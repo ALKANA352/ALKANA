@@ -194,30 +194,39 @@
       display: block;
       filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25));
     }
-    .photo-marquee {
+    .photo-slider {
+      position: relative;
+      height: 260px;
+      max-width: 720px;
+      margin: 0 auto;
+      border-radius: 1.5rem;
       overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.15);
     }
-    .photo-track {
-      display: flex;
-      gap: 1rem;
-      width: max-content;
-      animation: scrollPhotos 28s linear infinite;
-    }
-    .photo-item {
-      width: 220px;
-      height: 160px;
+    .photo-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      border-radius: 1rem;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-      flex: 0 0 auto;
-      border: 2px solid rgba(255,255,255,0.7);
+      opacity: 0;
+      animation: photoFade 12s infinite;
     }
-    @keyframes scrollPhotos {
-      from {
-        transform: translateX(0);
+    @keyframes photoFade {
+      0% {
+        opacity: 0;
       }
-      to {
-        transform: translateX(-50%);
+      5% {
+        opacity: 1;
+      }
+      30% {
+        opacity: 1;
+      }
+      35% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
       }
     }
   </style>
@@ -267,22 +276,13 @@
         <h2 class="text-4xl md:text-5xl font-black mb-3 text-gray-800">✨ صور من أجوائنا</h2>
         <div class="w-20 h-1 bg-gradient-to-r from-green-500 to-green-600 mx-auto rounded-full"></div>
       </div>
-      <div class="photo-marquee">
-        <div class="photo-track">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.47.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49%20%281%29.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.16.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17%20%281%29.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17.jpeg" alt="صورة من المطعم">
-          <!-- duplicate for seamless loop -->
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.47.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49%20%281%29.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.16.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17%20%281%29.jpeg" alt="صورة من المطعم">
-          <img class="photo-item" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17.jpeg" alt="صورة من المطعم">
-        </div>
+      <div class="photo-slider">
+        <img class="photo-slide" style="animation-delay: 0s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.47.jpeg" alt="صورة من المطعم">
+        <img class="photo-slide" style="animation-delay: 2s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49%20%281%29.jpeg" alt="صورة من المطعم">
+        <img class="photo-slide" style="animation-delay: 4s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.22.49.jpeg" alt="صورة من المطعم">
+        <img class="photo-slide" style="animation-delay: 6s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.16.jpeg" alt="صورة من المطعم">
+        <img class="photo-slide" style="animation-delay: 8s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17%20%281%29.jpeg" alt="صورة من المطعم">
+        <img class="photo-slide" style="animation-delay: 10s;" src="photo/WhatsApp%20Image%202026-01-08%20at%2013.30.17.jpeg" alt="صورة من المطعم">
       </div>
     </div>
   </section>
