@@ -377,8 +377,15 @@
 
       <div class="mb-4">
         <label class="block text-gray-700 font-semibold mb-2 text-lg">الموقع (مطلوب):</label>
-        <input type="text" id="cartLocation" placeholder="أدخل عنوان التوصيل" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus:border-green-500 focus:outline-none" required>
+        <div class="flex flex-col gap-3">
+          <input type="text" id="cartLocation" placeholder="أدخل عنوان التوصيل أو سيتم تعبئته من GPS" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-lg focus:border-green-500 focus:outline-none" required>
+          <button id="requestGpsLocation" type="button" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-full font-bold text-lg hover:shadow-lg transition">
+            📍 تحديد موقعي عبر GPS
+          </button>
+        </div>
+        <p class="text-gray-500 text-sm mt-2 hidden" id="cartLocationInfo">يتم طلب إذن الموقع من المتصفح لتعبئة الموقع تلقائيًا.</p>
         <p class="text-red-500 text-sm mt-1 hidden" id="cartLocationError">الرجاء إدخال الموقع</p>
+        <p class="text-red-500 text-sm mt-1 hidden" id="cartLocationGpsError">تعذر الحصول على الموقع عبر GPS. تأكد من تفعيل الموقع والسماح للإذن.</p>
       </div>
 
       <button id="submitCartOrder" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-full font-bold text-xl hover:shadow-lg transition">
@@ -611,6 +618,9 @@
     const submitCartOrderBtn = document.getElementById('submitCartOrder');
     const cartLocationInput = document.getElementById('cartLocation');
     const cartLocationError = document.getElementById('cartLocationError');
+    const requestGpsLocationBtn = document.getElementById('requestGpsLocation');
+    const cartLocationInfo = document.getElementById('cartLocationInfo');
+    const cartLocationGpsError = document.getElementById('cartLocationGpsError');
 
     // Add to cart
     addToCartBtn.addEventListener('click', function() {
@@ -634,10 +644,79 @@
       alert('تم إضافة المنتج للسلة بنجاح! ✅');
     });
 
+    function setGpsErrorVisible(isVisible) {
+      if (isVisible) {
+        cartLocationGpsError.classList.remove('hidden');
+      } else {
+        cartLocationGpsError.classList.add('hidden');
+      }
+    }
+
+    function setLocationInfoVisible(isVisible) {
+      if (isVisible) {
+        cartLocationInfo.classList.remove('hidden');
+      } else {
+        cartLocationInfo.classList.add('hidden');
+      }
+    }
+
+    function requestGpsLocation() {
+      setGpsErrorVisible(false);
+      setLocationInfoVisible(true);
+
+      if (!navigator.geolocation) {
+        setLocationInfoVisible(false);
+        setGpsErrorVisible(true);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const latitude = position.coords.latitude.toFixed(6);
+          const longitude = position.coords.longitude.toFixed(6);
+          cartLocationInput.value = `${latitude}, ${longitude}`;
+          setLocationInfoVisible(false);
+        },
+        function() {
+          setLocationInfoVisible(false);
+          setGpsErrorVisible(true);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    cartLocationInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        cartLocationError.classList.add('hidden');
+        setGpsErrorVisible(false);
+      }
+    });
+
+    function buildMapsLink(locationText) {
+      const trimmed = locationText.trim();
+      if (!trimmed) {
+        return '';
+      }
+      const coordsMatch = trimmed.match(/^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/);
+      if (coordsMatch) {
+        const lat = coordsMatch[1];
+        const lng = coordsMatch[3];
+        return `https://www.google.com/maps?q=${lat},${lng}`;
+      }
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+    }
+
     // Open cart modal
     cartBtn.addEventListener('click', function() {
       cartModal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      if (!cartLocationInput.value.trim()) {
+        requestGpsLocation();
+      }
     });
 
     // Close cart modal
@@ -699,6 +778,11 @@
       cartTotalPrice.textContent = total + ' ج.م';
     }
 
+    // Request GPS location
+    requestGpsLocationBtn.addEventListener('click', function() {
+      requestGpsLocation();
+    });
+
     // Submit cart order
     submitCartOrderBtn.addEventListener('click', function() {
       if (cart.length === 0) {
@@ -715,6 +799,7 @@
       }
 
       cartLocationError.classList.add('hidden');
+      setGpsErrorVisible(false);
       
       // Create WhatsApp message
       let message = `🍽️ طلب جديد من مطعم الخان\n\n`;
@@ -727,7 +812,12 @@
       
       const total = cart.reduce((sum, item) => sum + item.total, 0);
       message += `💰 السعر الإجمالي: ${total} ج.م\n`;
-      message += `📍 الموقع: ${location}\n\n`;
+      const mapsLink = buildMapsLink(location);
+      message += `📍 الموقع: ${location}\n`;
+      if (mapsLink) {
+        message += `🗺️ رابط الموقع: ${mapsLink}\n`;
+      }
+      message += `\n`;
       message += `شكراً لطلبك! 🎉`;
 
       // Encode message for URL
